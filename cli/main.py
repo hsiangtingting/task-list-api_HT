@@ -1,11 +1,11 @@
 import task_list
 
 OPTIONS = {
-        "1": "List all tasks", 
+        "1": "List all tasks",
         "2": "Create a task",
-        "3": "View one task", 
-        "4": "Update task", 
-        "5": "Delete task", 
+        "3": "View one task",
+        "4": "Update task",
+        "5": "Delete task",
         "6": "Mark complete",
         "7": "Mark incomplete",
         "8": "Delete all tasks",
@@ -47,7 +47,7 @@ def get_task_from_user(msg = "Input the id of the task you would like to work wi
         if count >= help_count:
             print("You seem to be having trouble selecting a task.  Please choose from the following list of tasks.")
             print_all_tasks()
-        
+
     return task
 
 
@@ -93,7 +93,7 @@ def create_task():
 
 def view_task():
     task = get_task_from_user("Input the id of the task you would like to select ")
-    if task: 
+    if task:
         print("\nSelected Task:")
         print_task(task)
 
