@@ -1,6 +1,7 @@
 from flask import Flask
 from .db import db, migrate
 from .models import task, goal
+from .routes.task_routes import tasks_bp
 import os
 
 def create_app(config=None):

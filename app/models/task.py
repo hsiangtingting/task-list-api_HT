@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from ..db import db
 from datetime import datetime
+import json
 
 class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -8,7 +9,7 @@ class Task(db.Model):
     description: Mapped[str]
     completed_at:Mapped[datetime] = mapped_column(nullable=True)
 
-    def task_to_dict(self):
+    def to_dict(self):
         '''
         return Task instance with a dictionary
         '''
@@ -16,7 +17,26 @@ class Task(db.Model):
             "id":self.id,
             "title":self.title,
             "description":self.description,
-            "completed_at":self.completed_at
+            "is_complete":self.completed_at is not None
         }
 
         return task
+
+    @classmethod
+    def from_dict(cls, task_data: dict):
+        '''
+        Create a Task instance from a dictionary
+        '''
+        title = task_data["title"]
+        description = task_data["description"]
+        completed_at_value = None
+        if task_data.get("is_complete") is True:
+            completed_at_value = datetime.now()
+
+        new_task = cls(
+            title=title,
+            description=description,
+            completed_at=completed_at_value
+        )
+
+        return new_task
