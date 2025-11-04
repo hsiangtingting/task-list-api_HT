@@ -122,5 +122,22 @@ def delete_task(task_id):
 
     return Response(status=204, mimetype="application/json")
 
+@bp.patch("/<task_id>/mark_complete")
+def mark_task_complete(task_id):
+    task = validate_model(Task, task_id)
+
+    task.completed_at = db.func.now()
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
+
+@bp.patch("/<task_id>/mark_incomplete")
+def mark_task_incomplete(task_id):
+    task = validate_model(Task, task_id)
+
+    task.completed_at = None
+    db.session.commit()
+
+    return Response(status=204, mimetype="application/json")
 
 
