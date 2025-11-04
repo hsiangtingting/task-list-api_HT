@@ -5,15 +5,6 @@ from .route_utilities import validate_model
 
 bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
-
-# def get_task_or_abort(task_id):
-#     task = db.session.get(Task, task_id)
-
-#     if task is None:
-#         abort(404, description=f"Task{task_id} not found")
-
-#     return task
-
 # def validate_task(task_id):
 #     try:
 #         task_id = int(task_id)
@@ -96,8 +87,13 @@ def get_all_tasks():
 
     tasks_response = []
     for task in tasks:
-        # Use the model's to_dict so we return `is_complete` instead of `completed_at`
         tasks_response.append(task.to_dict())
+
+    sort_order = request.args.get("sort")
+    if sort_order == "asc":
+        tasks_response.sort(key=lambda x: x["title"], reverse=False)
+    elif sort_order == "desc":
+        tasks_response.sort(key=lambda x: x["title"], reverse=True)
 
     return tasks_response, 200
 
