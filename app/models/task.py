@@ -27,15 +27,17 @@ class Task(db.Model):
         '''
         Create a Task instance from a dictionary
         '''
-        title = task_data["title"]
-        description = task_data["description"]
+        # title = task_data["title"]
+        # description = task_data["description"]
         completed_at_value = None
         if task_data.get("is_complete") is True:
             completed_at_value = datetime.now()
 
+        # Build the Task using the mapped attribute name `completed_at`.
+        # If `is_complete` is True we set a timestamp, otherwise None.
         new_task = cls(
-            title=title,
-            description=description,
+            title=task_data["title"],
+            description=task_data["description"],
             completed_at=completed_at_value
         )
 
