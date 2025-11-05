@@ -1,23 +1,9 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
+from .route_utilities import validate_model, create_model, get_models_with_filters
 from ..db import db
-from .route_utilities import validate_model
 
 bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
-
-# def validate_task(task_id):
-#     try:
-#         task_id = int(task_id)
-#     except:
-#         response = {"message":f"task {task_id} invalid"}
-#         abort(make_response(response, 400))
-
-#     task = db.session.get(Task, task_id)
-#     if task:
-#         return task
-
-#     response = {"message": f"task {task_id} not found"}
-#     abort(make_response(response, 404))
 
 @bp.get("/<task_id>")
 def get_task(task_id):
@@ -29,66 +15,25 @@ def get_task(task_id):
 @bp.post("")
 def create_task():
     request_body = request.get_json()
-    # title = request_body["title"]
-    # description = request_body["description"]
-    # completed_at = request_body["completed_at"]
 
-    # Validate required fields
-    if not request_body or "title" not in request_body or "description" not in request_body:
-        return {"details": "Invalid data"}, 400
-
-    new_task = Task.from_dict(request_body)
-    db.session.add(new_task)
-    db.session.commit()
-
-    # new_task = dict(
-    #     id=new_task.id,
-    #     title=new_task.title,
-    #     description=new_task.description,
-    #     completed_at=new_task.completed_at
-    # )
-
-    # try:
-    #     title = request_body["title"]
-    #     description = request_body["description"]
-    #     completed_at = request_body["completed_at"]
-    #     new_task = Task(title=title, description=description, completed_at=completed_at)
-
-    # except KeyError as error:
-    #     response = {"message": f"Invalid request: missing {error.args[0]}"}
-    #     abort(make_response(response, 400))
-
-
-    # if not completed_at:
-    #     response["is_complete"] = False
-    # else:
-    #     response["is_complete"] = True
-
-    # if not new_task :
-    #     return {"details": "Invalid data"}, 400
-
-    return new_task.to_dict(), 201
+    return create_model(Task, request_body)
 
 @bp.get("")
 def get_all_tasks():
-    query = db.select(Task)
+    # Build filters from query params and reuse get_models_with_filters helper
+    filters = {}
     title_param = request.args.get("title")
     description_param = request.args.get("description")
 
     if title_param:
-        query = query.where(Task.title == title_param)
+        filters["title"] = title_param
 
     if description_param:
-        query = query.where (Task.description.ilike(f"%{description_param}%"))
+        filters["description"] = description_param
 
-    tasks = db.session.scalars(query.order_by(Task.id))
-    # query = query.order_by(Task.id)
-    # tasks = db.session.scalars(query)
+    tasks_response = get_models_with_filters(Task, filters if filters else None)
 
-    tasks_response = []
-    for task in tasks:
-        tasks_response.append(task.to_dict())
-
+    # Support sort query param (asc/desc) on title
     sort_order = request.args.get("sort")
     if sort_order == "asc":
         tasks_response.sort(key=lambda x: x["title"], reverse=False)
@@ -141,3 +86,16 @@ def mark_task_incomplete(task_id):
     return Response(status=204, mimetype="application/json")
 
 
+# def validate_task(task_id):
+#     try:
+#         task_id = int(task_id)
+#     except:
+#         response = {"message":f"task {task_id} invalid"}
+#         abort(make_response(response, 400))
+
+#     task = db.session.get(Task, task_id)
+#     if task:
+#         return task
+
+#     response = {"message": f"task {task_id} not found"}
+#     abort(make_response(response, 404))
