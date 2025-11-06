@@ -8,7 +8,7 @@ class Task(db.Model):
     title: Mapped[str]
     description: Mapped[str]
     completed_at:Mapped[datetime] = mapped_column(nullable=True)
-    goals:Mapped[list["Goal"]] = relationship(back_populates="task")
+    # goals:Mapped[list["Goal"]] = relationship(back_populates="task")
 
     def to_dict(self):
         '''
@@ -21,8 +21,8 @@ class Task(db.Model):
             "is_complete":self.completed_at is not None
         }
 
-        if self.goals:
-            task["goals"] = self.goals
+        # if self.goals:
+        #     task["goals"] = self.goals
 
         return task
 

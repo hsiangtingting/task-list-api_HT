@@ -7,7 +7,7 @@ import os
 from app.models.task import Task
 from app.models.goal import Goal
 from datetime import datetime
-from app.routes.route_utilities import validate_model, create_model
+from app.routes.route_utilities import validate_model, create_model, get_models_with_filters
 
 load_dotenv()
 
