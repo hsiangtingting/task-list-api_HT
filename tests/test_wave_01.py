@@ -226,7 +226,6 @@ def test_delete_task(client, one_task):
 
     # Assert
     assert response.status_code == 204
-
     query = db.select(Task).where(Task.id == 1)
     assert db.session.scalar(query) == None
 
