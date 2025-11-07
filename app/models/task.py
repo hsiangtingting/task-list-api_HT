@@ -3,7 +3,7 @@ from ..db import db
 from datetime import datetime
 from sqlalchemy import ForeignKey
 from typing import Optional
-from app.models.goal import Goal
+
 
 class Task(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -19,10 +19,14 @@ class Task(db.Model):
         '''
         task = {
             "id":self.id,
+            "goal_id":self.goal_id,
             "title":self.title,
             "description":self.description,
             "is_complete":self.completed_at is not None
         }
+
+        # if include_goal_id :
+        #     task["goal_id"] = self.goal_id.to_dict() if self.goal else None
 
         return task
 

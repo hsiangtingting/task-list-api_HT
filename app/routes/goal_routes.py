@@ -28,7 +28,9 @@ def get_all_goals():
     if title_param:
         filters["title"] = title_param
 
-    goals_response = get_models_with_filters(Goal, filters if filters else None)
+    goals = db.session.query(Goal).filter_by(**filters).all()
+    goals_response = [goal.to_dict() for goal in goals]
+    # goals_response = get_models_with_filters(Goal, filters if filters else None)
 
     # Support sort query param (asc/desc) on title
     sort_order = request.args.get("sort")
@@ -59,7 +61,7 @@ def delete_goal(goal_id):
 
     return Response(status=204, mimetype="application/json")
 
-@bp.post("/goals/<goal_id>/tasks")
+@bp.post("/<goal_id>/tasks")
 def link_task_id_to_goal(goal_id):
     goal = validate_model(Goal, goal_id)
 
@@ -68,6 +70,9 @@ def link_task_id_to_goal(goal_id):
 
     if not task_ids_to_link or not isinstance(task_ids_to_link, list):
         abort(400, description="Request body must contain a list of 'task_ids'.")
+
+    for task in goal.tasks:
+        task.goal_id = None
 
     tasks_to_update = get_models_or_abort(Task, task_ids_to_link)
 
@@ -83,7 +88,7 @@ def link_task_id_to_goal(goal_id):
 
     return response_body, 200
 
-@bp.get("/goals/<goal_id>/tasks")
+@bp.get("/<goal_id>/tasks")
 def get_tasks_content_for_goal(goal_id):
     goal = validate_model(Goal, goal_id)
 
