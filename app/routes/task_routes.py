@@ -9,8 +9,6 @@ bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 def get_task(task_id):
     task = validate_model(Task, task_id)
 
-    db.session.refresh(task)
-
     return task.to_dict(), 200
 
 @bp.post("")

@@ -3,7 +3,7 @@ from app.models.task import Task
 from app.models.goal import Goal
 from ..db import db
 
-def validate_model(cls, id):
+def validate_model(cls, id, refresh=False):
     try:
         id = int(id)
     except:
@@ -15,6 +15,9 @@ def validate_model(cls, id):
     if not model:
         not_found = {"message": f"{cls.__name__.lower()} {id} not found"}
         abort(make_response(not_found, 404))
+
+    if refresh:
+        db.session.refresh(model)
 
     return model
 
