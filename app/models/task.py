@@ -19,14 +19,13 @@ class Task(db.Model):
         '''
         task = {
             "id":self.id,
-            "goal_id":self.goal_id,
             "title":self.title,
             "description":self.description,
             "is_complete":self.completed_at is not None
         }
 
-        # if include_goal_id :
-        #     task["goal_id"] = self.goal_id.to_dict() if self.goal else None
+        if self.goal_id is not None:
+            task["goal_id"] = self.goal_id
 
         return task
 
@@ -35,14 +34,10 @@ class Task(db.Model):
         '''
         Create a Task instance from a dictionary
         '''
-        # title = task_data["title"]
-        # description = task_data["description"]
         completed_at_value = None
         if task_data.get("is_complete") is True:
             completed_at_value = datetime.now()
 
-        # Build the Task using the mapped attribute name `completed_at`.
-        # If `is_complete` is True we set a timestamp, otherwise None.
         new_task = cls(
             title=task_data["title"],
             description=task_data["description"],

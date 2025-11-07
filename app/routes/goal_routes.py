@@ -16,12 +16,10 @@ def create_goal():
 def get_goal(goal_id):
     goal = validate_model(Goal, goal_id)
 
-    # Use Goal.to_dict() to produce the expected response shape
     return goal.to_dict(), 200
 
 @bp.get("")
 def get_all_goals():
-    # Build filters from query params and reuse get_models_with_filters helper
     filters = {}
     title_param = request.args.get("title")
 
@@ -30,9 +28,7 @@ def get_all_goals():
 
     goals = db.session.query(Goal).filter_by(**filters).all()
     goals_response = [goal.to_dict() for goal in goals]
-    # goals_response = get_models_with_filters(Goal, filters if filters else None)
 
-    # Support sort query param (asc/desc) on title
     sort_order = request.args.get("sort")
     if sort_order == "asc":
         goals_response.sort(key=lambda x: x["title"], reverse=False)
@@ -92,7 +88,6 @@ def link_task_id_to_goal(goal_id):
 def get_tasks_content_for_goal(goal_id):
     goal = validate_model(Goal, goal_id)
 
-    # tasks = db.session.query(Task).filter(Task.goal_id == goal_id).all()
     tasks_response = [task.to_dict() for task in goal.tasks]
 
     response_body = {
@@ -102,21 +97,3 @@ def get_tasks_content_for_goal(goal_id):
     }
     return response_body, 200
 
-
-# @bp.patch("/<goal_id>/mark_complete")
-# def mark_goal_complete(goal_id):
-#     goal = validate_model(Goal, goal_id)
-
-#     goal.completed_at = db.func.now()
-#     db.session.commit()
-
-#     return Response(status=204, mimetype="application/json")
-
-# @bp.patch("/<goal_id>/mark_incomplete")
-# def mark_goal_incomplete(goal_id):
-#     goal = validate_model(Goal, goal_id)
-
-#     goal.completed_at = None
-#     db.session.commit()
-
-#     return Response(status=204, mimetype="application/json")

@@ -9,7 +9,8 @@ bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 def get_task(task_id):
     task = validate_model(Task, task_id)
 
-    # Use Task.to_dict() to produce the expected response shape
+    db.session.refresh(task)
+
     return task.to_dict(), 200
 
 @bp.post("")
@@ -20,7 +21,6 @@ def create_task():
 
 @bp.get("")
 def get_all_tasks():
-    # Build filters from query params and reuse get_models_with_filters helper
     filters = {}
     title_param = request.args.get("title")
     description_param = request.args.get("description")
@@ -33,7 +33,6 @@ def get_all_tasks():
 
     tasks_response = get_models_with_filters(Task, filters if filters else None)
 
-    # Support sort query param (asc/desc) on title
     sort_order = request.args.get("sort")
     if sort_order == "asc":
         tasks_response.sort(key=lambda x: x["title"], reverse=False)
@@ -50,7 +49,6 @@ def update_task(task_id):
     task.title = request_body["title"]
     task.description = request_body["description"]
 
-    # Only update completed_at if provided in the request
     if "completed_at" in request_body:
         task.completed_at = request_body["completed_at"]
 
@@ -85,17 +83,3 @@ def mark_task_incomplete(task_id):
 
     return Response(status=204, mimetype="application/json")
 
-
-# def validate_task(task_id):
-#     try:
-#         task_id = int(task_id)
-#     except:
-#         response = {"message":f"task {task_id} invalid"}
-#         abort(make_response(response, 400))
-
-#     task = db.session.get(Task, task_id)
-#     if task:
-#         return task
-
-#     response = {"message": f"task {task_id} not found"}
-#     abort(make_response(response, 404))
