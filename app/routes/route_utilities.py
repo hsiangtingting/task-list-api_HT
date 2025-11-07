@@ -46,3 +46,25 @@ def get_models_with_filters(cls, filters=None):
     models = db.session.scalars(query.order_by(cls.id))
     models_response = [model.to_dict() for model in models]
     return models_response
+
+def get_models_or_abort(Model, id_list):
+    """
+    Fetches a list of model instances by ID.
+    Aborts with 404 if any ID in the list does not exist.
+    """
+    # 1. Query the database for all instances matching the list of IDs
+    instances = db.session.query(Model).filter(Model.id.in_(id_list)).all()
+
+    # 2. Check if the number of fetched instances matches the number of IDs requested
+    if len(instances) != len(id_list):
+        # Determine exactly which IDs were missing
+        found_ids = {instance.id for instance in instances}
+        missing_ids = [tid for tid in id_list if tid not in found_ids]
+
+        # 3. Abort the request if any IDs are missing
+        if missing_ids:
+            # Note: Customize the description to fit your exact test/requirement,
+            # but 404 is the correct response for a missing resource.
+            abort(404, description=f"{Model.__name__}(s) with ID(s) {missing_ids} not found.")
+
+    return instances

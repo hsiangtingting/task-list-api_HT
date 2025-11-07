@@ -1,13 +1,13 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
 from app.models.goal import Goal
-from .route_utilities import validate_model, create_model, get_models_with_filters
+from .route_utilities import validate_model, create_model, get_models_with_filters, get_models_or_abort
 from ..db import db
 
 bp = Blueprint("goal_bp", __name__, url_prefix="/goals")
 
 @bp.post("")
-def create_task():
+def create_goal():
     request_body = request.get_json()
 
     return create_model(Goal, request_body)
@@ -58,6 +58,45 @@ def delete_goal(goal_id):
     db.session.commit()
 
     return Response(status=204, mimetype="application/json")
+
+@bp.post("/goals/<goal_id>/tasks")
+def link_task_id_to_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+
+    request_body = request.get_json()
+    task_ids_to_link = request_body.get("task_ids")
+
+    if not task_ids_to_link or not isinstance(task_ids_to_link, list):
+        abort(400, description="Request body must contain a list of 'task_ids'.")
+
+    tasks_to_update = get_models_or_abort(Task, task_ids_to_link)
+
+    for task in tasks_to_update:
+        task.goal_id = goal.id
+
+    db.session.commit()
+
+    response_body = {
+        "id": goal.id,
+        "task_ids": [task.id for task in tasks_to_update]
+    }
+
+    return response_body, 200
+
+@bp.get("/goals/<goal_id>/tasks")
+def get_tasks_content_for_goal(goal_id):
+    goal = validate_model(Goal, goal_id)
+
+    # tasks = db.session.query(Task).filter(Task.goal_id == goal_id).all()
+    tasks_response = [task.to_dict() for task in goal.tasks]
+
+    response_body = {
+        "id": goal.id,
+        "title": goal.title,
+        "tasks": tasks_response
+    }
+    return response_body, 200
+
 
 # @bp.patch("/<goal_id>/mark_complete")
 # def mark_goal_complete(goal_id):

@@ -1,19 +1,18 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import ForeignKey
 from typing import Optional
+from app.models.task import Task
 from ..db import db
 
 class Goal(db.Model):
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
-    # task_id: Mapped[Optional[int]] = mapped_column(ForeignKey("task.id"))
-    # task: Mapped[Optional["Task"]] = relationship(back_populates="goals")
+    tasks:Mapped[Optional[list["Task"]]] = relationship(back_populates="goal")
 
     def to_dict(self):
         model_dict = {
             "id": self.id,
             "title": self.title,
-            # "task": self.task.title if self.task_id else None
+            "tasks": [task.to_dict() for task in self.tasks]
         }
 
         return model_dict
@@ -22,5 +21,5 @@ class Goal(db.Model):
     def from_dict(cls, data_dict):
         return cls(
             title = data_dict["title"],
-            # task_id = data_dict.get("task_id")
+            tasks = [Task.from_dict(task) for task in data_dict.get("tasks", [])]
             )
