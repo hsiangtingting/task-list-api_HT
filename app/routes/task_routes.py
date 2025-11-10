@@ -1,7 +1,9 @@
 from flask import Blueprint, abort, make_response, request, Response
 from app.models.task import Task
 from .route_utilities import validate_model, create_model, get_models_with_filters
+from ..services.slack_service import send_slack_notification
 from ..db import db
+import os
 
 bp = Blueprint("task_bp", __name__, url_prefix="/tasks")
 
@@ -69,6 +71,9 @@ def mark_task_complete(task_id):
 
     task.completed_at = db.func.now()
     db.session.commit()
+
+    message = f"Someone just completed the task: {task.title}"
+    send_slack_notification(message)
 
     return Response(status=204, mimetype="application/json")
 
