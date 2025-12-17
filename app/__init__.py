@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from .db import db, migrate
 from .models.task import Task
 from .models.goal import Goal
@@ -8,9 +9,10 @@ import os
 
 def create_app(config=None):
     app = Flask(__name__)
-
+    CORS(app)
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    app.config['CORS_HEADERS'] = 'Content-Type'
 
     if config:
         app.config.update(config)
